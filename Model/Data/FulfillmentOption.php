@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Fulfillment Option Data Transfer Object
  */
-class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
+class FulfillmentOption extends DataTransferObject implements FulfillmentOptionInterface
 {
     /**
      * @inheritDoc
      */
     public function getType(): string
     {
-        return (string) $this->getData('type');
+        return $this->getDataString('type');
     }
 
     /**
@@ -41,7 +41,7 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
      */
     public function getId(): string
     {
-        return (string) $this->getData('id');
+        return $this->getDataString('id');
     }
 
     /**
@@ -57,7 +57,7 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
      */
     public function getTitle(): string
     {
-        return (string) $this->getData('title');
+        return $this->getDataString('title');
     }
 
     /**
@@ -73,7 +73,7 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
      */
     public function getSubtitle(): ?string
     {
-        return $this->getData('subtitle');
+        return $this->getDataStringOrNull('subtitle');
     }
 
     /**
@@ -89,7 +89,7 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
      */
     public function getSubtotal(): int
     {
-        return (int) $this->getData('subtotal');
+        return $this->getDataInt('subtotal');
     }
 
     /**
@@ -105,7 +105,7 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
      */
     public function getTax(): int
     {
-        return (int) $this->getData('tax');
+        return $this->getDataInt('tax');
     }
 
     /**
@@ -121,7 +121,7 @@ class FulfillmentOption extends DataObject implements FulfillmentOptionInterface
      */
     public function getTotal(): int
     {
-        return (int) $this->getData('total');
+        return $this->getDataInt('total');
     }
 
     /**

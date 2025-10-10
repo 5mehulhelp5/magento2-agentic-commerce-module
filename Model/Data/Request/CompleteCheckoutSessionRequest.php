@@ -16,7 +16,6 @@ use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentDataInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
-use Magento\Framework\Exception\LocalizedException;
 
 class CompleteCheckoutSessionRequest extends DataTransferObject implements CompleteCheckoutSessionRequestInterface
 {
@@ -38,15 +37,7 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements Compl
      */
     public function getBuyer(): ?BuyerInterface
     {
-        $buyer = $this->getData('buyer');
-
-        if ($buyer instanceof BuyerInterface) {
-            return $buyer;
-        }
-        if (is_array($buyer)) {
-            return $this->buyerInterfaceFactory->create(['data' => $buyer]);
-        }
-        return null;
+        return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
     }
 
     /**
@@ -54,12 +45,6 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements Compl
      */
     public function getPaymentData(): PaymentDataInterface
     {
-        $paymentData = $this->getData('payment_data');
-
-        if (!is_array($paymentData)) {
-            throw new LocalizedException(__('Payment data is required'));
-        }
-
-        return $this->paymentDataInterfaceFactory->create(['data' => $paymentData]);
+        return $this->getDataInstance('payment_data', PaymentDataInterface::class, $this->paymentDataInterfaceFactory->create(...));
     }
 }

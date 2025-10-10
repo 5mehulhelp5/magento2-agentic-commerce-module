@@ -12,13 +12,13 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Data;
 
-use Magebit\AgenticCommerce\Api\Data\TotalInterface;
+use Magebit\AgenticCommerce\Api\Data\RiskSignalInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
- * Total Data Transfer Object
+ * Risk Signal Data Transfer Object
  */
-class Total extends DataTransferObject implements TotalInterface
+class RiskSignal extends DataTransferObject implements RiskSignalInterface
 {
     /**
      * @inheritDoc
@@ -31,7 +31,7 @@ class Total extends DataTransferObject implements TotalInterface
     /**
      * @inheritDoc
      */
-    public function setType(string $type): TotalInterface
+    public function setType(string $type): RiskSignalInterface
     {
         return $this->setData('type', $type);
     }
@@ -39,32 +39,32 @@ class Total extends DataTransferObject implements TotalInterface
     /**
      * @inheritDoc
      */
-    public function getDisplayText(): string
+    public function getScore(): int
     {
-        return $this->getDataString('display_text');
+        return $this->getDataInt('score');
     }
 
     /**
      * @inheritDoc
      */
-    public function setDisplayText(string $text): TotalInterface
+    public function setScore(int $score): RiskSignalInterface
     {
-        return $this->setData('display_text', $text);
+        return $this->setData('score', $score);
     }
 
     /**
      * @inheritDoc
      */
-    public function getAmount(): int
+    public function getAction(): string
     {
-        return $this->getDataInt('amount');
+        return $this->getDataString('action');
     }
 
     /**
      * @inheritDoc
      */
-    public function setAmount(int $amount): TotalInterface
+    public function setAction(string $action): RiskSignalInterface
     {
-        return $this->setData('amount', $amount);
+        return $this->setData('action', $action);
     }
 }

@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Payment Provider Data Transfer Object
  */
-class PaymentProvider extends DataObject implements PaymentProviderInterface
+class PaymentProvider extends DataTransferObject implements PaymentProviderInterface
 {
     /**
      * @inheritDoc
      */
     public function getProvider(): string
     {
-        return (string) $this->getData('provider');
+        return $this->getDataString('provider');
     }
 
     /**
@@ -41,7 +41,7 @@ class PaymentProvider extends DataObject implements PaymentProviderInterface
      */
     public function getSupportedPaymentMethods(): array
     {
-        return (array) $this->getData('supported_payment_methods');
+        return $this->getDataArray('supported_payment_methods');
     }
 
     /**

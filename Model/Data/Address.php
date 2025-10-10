@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Address Data Transfer Object
  */
-class Address extends DataObject implements AddressInterface
+class Address extends DataTransferObject implements AddressInterface
 {
     /**
      * @inheritDoc
      */
     public function getName(): string
     {
-        return (string) $this->getData('name');
+        return $this->getDataString('name');
     }
 
     /**
@@ -41,7 +41,7 @@ class Address extends DataObject implements AddressInterface
      */
     public function getLineOne(): string
     {
-        return (string) $this->getData('line_one');
+        return $this->getDataString('line_one');
     }
 
     /**
@@ -57,7 +57,7 @@ class Address extends DataObject implements AddressInterface
      */
     public function getLineTwo(): ?string
     {
-        return $this->getData('line_two');
+        return $this->getDataStringOrNull('line_two');
     }
 
     /**
@@ -73,7 +73,7 @@ class Address extends DataObject implements AddressInterface
      */
     public function getCity(): string
     {
-        return (string) $this->getData('city');
+        return $this->getDataString('city');
     }
 
     /**
@@ -87,15 +87,15 @@ class Address extends DataObject implements AddressInterface
     /**
      * @inheritDoc
      */
-    public function getState(): string
+    public function getState(): ?string
     {
-        return (string) $this->getData('state');
+        return $this->getDataStringOrNull('state');
     }
 
     /**
      * @inheritDoc
      */
-    public function setState(string $state): AddressInterface
+    public function setState(?string $state): AddressInterface
     {
         return $this->setData('state', $state);
     }
@@ -105,7 +105,7 @@ class Address extends DataObject implements AddressInterface
      */
     public function getCountry(): string
     {
-        return (string) $this->getData('country');
+        return $this->getDataString('country');
     }
 
     /**
@@ -121,7 +121,7 @@ class Address extends DataObject implements AddressInterface
      */
     public function getPostalCode(): string
     {
-        return (string) $this->getData('postal_code');
+        return $this->getDataString('postal_code');
     }
 
     /**

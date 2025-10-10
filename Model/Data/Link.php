@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\LinkInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Link Data Transfer Object
  */
-class Link extends DataObject implements LinkInterface
+class Link extends DataTransferObject implements LinkInterface
 {
     /**
      * @inheritDoc
      */
     public function getType(): string
     {
-        return (string) $this->getData('type');
+        return $this->getDataString('type');
     }
 
     /**
@@ -41,7 +41,7 @@ class Link extends DataObject implements LinkInterface
      */
     public function getUrl(): string
     {
-        return (string) $this->getData('url');
+        return $this->getDataString('url');
     }
 
     /**

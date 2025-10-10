@@ -17,9 +17,9 @@ use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
-class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutSessionRequestInterface
+class UpdateCheckoutSessionRequest extends DataTransferObject implements UpdateCheckoutSessionRequestInterface
 {
     /**
      * @param ItemInterfaceFactory $itemInterfaceFactory
@@ -41,17 +41,7 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getItems(): array
     {
-        /** @var array<mixed> $items */
-        $items = $this->getData('items') ?? [];
-
-        return array_map(function ($item) {
-            if ($item instanceof ItemInterface) {
-                return $item;
-            }
-
-            /** @var array<mixed> $item */
-            return $this->itemInterfaceFactory->create(['data' => $item]);
-        }, $items);
+        return $this->getDataInstanceArray('items', ItemInterface::class, $this->itemInterfaceFactory->create(...));
     }
 
     /**
@@ -59,15 +49,7 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getFulfillmentAddress(): ?AddressInterface
     {
-        $address = $this->getData('fulfillment_address');
-
-        if ($address instanceof AddressInterface) {
-            return $address;
-        }
-        if (is_array($address)) {
-            return $this->addressInterfaceFactory->create(['data' => $address]);
-        }
-        return null;
+        return $this->getDataInstance('fulfillment_address', AddressInterface::class, $this->addressInterfaceFactory->create(...));
     }
 
     /**
@@ -75,15 +57,7 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getBuyer(): ?BuyerInterface
     {
-        $buyer = $this->getData('buyer');
-
-        if ($buyer instanceof BuyerInterface) {
-            return $buyer;
-        }
-        if (is_array($buyer)) {
-            return $this->buyerInterfaceFactory->create(['data' => $buyer]);
-        }
-        return null;
+        return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
     }
 
     /**
@@ -91,7 +65,6 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getFulfillmentOptionId(): ?string
     {
-        // @phpstan-ignore return.type
-        return $this->getData('fulfillment_option_id');
+        return $this->getDataStringOrNull('fulfillment_option_id');
     }
 }
