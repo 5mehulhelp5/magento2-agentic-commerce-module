@@ -13,7 +13,9 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Api\Data;
 
 /**
- * Address interface
+ * Address interface for billing and shipping addresses in Agentic Commerce
+ *
+ * Represents physical address data following ISO standards for international compatibility
  */
 interface AddressInterface
 {
@@ -80,17 +82,17 @@ interface AddressInterface
     /**
      * Get state
      *
-     * @return string
+     * @return string|null
      */
-    public function getState(): string;
+    public function getState(): ?string;
 
     /**
      * Set state
      *
-     * @param string $state
+     * @param string|null $state
      * @return $this
      */
-    public function setState(string $state): self;
+    public function setState(?string $state): self;
 
     /**
      * Get country
