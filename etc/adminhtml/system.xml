@@ -82,6 +82,15 @@
                     <validate>required-entry validate-digits validate-zero-or-greater</validate>
                 </field>
 			</group>
+
+            <group id="idempotency" sortOrder="40" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Idempotency</label>
+                <field id="ttl" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>TTL</label>
+                    <comment>Time to live for idempotency. Default is `24 hours`</comment>
+                    <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                </field>
+			</group>
 		</section>
 	</system>
 </config>

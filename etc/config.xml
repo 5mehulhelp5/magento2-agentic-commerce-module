@@ -23,6 +23,9 @@
 				<seller_name_source>general</seller_name_source>
 				<return_window>14</return_window>
 			</product_feed>
+            <idempotency>
+                <ttl>24</ttl>
+            </idempotency>
 		</agentic_commerce>
 	</default>
 </config>

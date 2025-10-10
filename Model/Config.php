@@ -213,6 +213,22 @@ class Config implements ConfigInterface
     }
 
     /**
+     * @param int|null $storeId
+     * @return int
+     */
+    public function getIdempotencyTtl(?int $storeId = null): int
+    {
+        $value = $this->scopeConfig->getValue(ConfigInterface::CONFIG_IDEMPOTENCY_TTL, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$value) {
+            return 24;
+        }
+
+        // @phpstan-ignore cast.int
+        return (int) $value;
+    }
+
+    /**
      * @param string $url
      * @return string
      */

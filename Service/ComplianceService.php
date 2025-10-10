@@ -100,6 +100,10 @@ class ComplianceService
             return null;
         }
 
+        if ($idempotency->getExpiresAt() < date('Y-m-d H:i:s')) {
+            return null;
+        }
+
         return $this->resultJsonFactory
             ->create()
             ->setJsonData((string) $idempotency->getResponse())

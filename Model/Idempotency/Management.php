@@ -17,6 +17,7 @@ use Magebit\AgenticCommerce\Api\Data\IdempotencyInterface;
 use Magebit\AgenticCommerce\Api\Data\IdempotencyInterfaceFactory;
 use Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
 
 class Management
 {
@@ -25,10 +26,12 @@ class Management
     /**
      * @param IdempotencyRepositoryInterface $idempotencyRepository
      * @param IdempotencyInterfaceFactory $idempotencyFactory
+     * @param ConfigInterface $config
      */
     public function __construct(
         private readonly IdempotencyRepositoryInterface $idempotencyRepository,
         private readonly IdempotencyInterfaceFactory $idempotencyFactory,
+        private readonly ConfigInterface $config,
     ) {
     }
 
@@ -60,7 +63,11 @@ class Management
         $idempotency->setRequestHash($this->hashRequest($request));
         $idempotency->setResponse($response);
         $idempotency->setStatus($status);
-        $idempotency->setExpiresAt(date('Y-m-d H:i:s', strtotime('+24 hours')));
+
+        $expiresAt = (int) strtotime('+' . $this->config->getIdempotencyTtl() . ' hours');
+        $idempotency->setExpiresAt(
+            date('Y-m-d H:i:s', $expiresAt)
+        );
 
         $this->idempotencyRepository->save($idempotency);
 

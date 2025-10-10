@@ -28,6 +28,8 @@ interface ConfigInterface
     public const CONFIG_RETURN_POLICY_URL = 'agentic_commerce/product_feed/return_policy_url';
     public const CONFIG_RETURN_WINDOW = 'agentic_commerce/product_feed/return_window';
 
+    public const CONFIG_IDEMPOTENCY_TTL = 'agentic_commerce/idempotency/ttl';
+
     /**
      * @param int|null $storeId
      * @return bool
@@ -93,4 +95,10 @@ interface ConfigInterface
      * @return string
      */
     public function getCheckoutRouterBasePath(?int $storeId = null): string;
+
+    /**
+     * @param int|null $storeId
+     * @return int
+     */
+    public function getIdempotencyTtl(?int $storeId = null): int;
 }
