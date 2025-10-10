@@ -13,7 +13,7 @@ namespace Magebit\AgenticCommerce\Api\Data\Request;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 
-interface UpdateCheckoutSessionRequestInterface
+interface UpdateCheckoutSessionRequestInterface extends RequestInterface
 {
     /**
      * Get items

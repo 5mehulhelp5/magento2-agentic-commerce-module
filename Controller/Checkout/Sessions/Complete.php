@@ -27,30 +27,34 @@ use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magebit\AgenticCommerce\Service\RequestValidationService;
 
 class Complete extends ApiController implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param ComplianceService $complianceService
+     * @param RequestValidationService $requestValidationService
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
      * @param CheckoutSessionService $checkoutSessionService
      * @param CompleteCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
      * @param ConfigInterface $config
+     * @param RequestValidationService $requestValidationService
      */
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
+        RequestValidationService $requestValidationService,
+        ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
-        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly CompleteCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
-        protected readonly ConfigInterface $config
+        protected readonly ConfigInterface $config,
     ) {
-        parent::__construct($resultJsonFactory, $request);
+        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
     }
 
     /**
@@ -93,21 +97,12 @@ class Complete extends ApiController implements HttpPostActionInterface
             ]]));
         }
 
-        /** @var string $content */
-        $content = $request->getContent();
-        $rawData = json_decode($content, true);
-
-        if (!is_array($rawData) || !isset($rawData['payment_data']) || !is_array($rawData['payment_data'])) {
-            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
-                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
-                'code' => 'invalid_request',
-                'message' => 'Invalid request',
-                'path' => '$.payment_data',
-            ]]));
-        }
-
         /** @var CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest */
-        $checkoutSessionsRequest = $this->checkoutSessionsRequestFactory->create(['data' => $rawData]);
+        $checkoutSessionsRequest = $this->createRequestObjectAndValidate($this->checkoutSessionsRequestFactory->create(...));
+
+        if ($checkoutSessionsRequest instanceof ErrorResponseInterface) {
+            return $this->makeErrorResponse($checkoutSessionsRequest);
+        }
 
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->complete($sessionId, $checkoutSessionsRequest);

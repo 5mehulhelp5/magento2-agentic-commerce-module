@@ -18,6 +18,7 @@ use Magebit\AgenticCommerce\Api\Data\IdempotencyInterfaceFactory;
 use Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 class Management
 {
@@ -27,11 +28,13 @@ class Management
      * @param IdempotencyRepositoryInterface $idempotencyRepository
      * @param IdempotencyInterfaceFactory $idempotencyFactory
      * @param ConfigInterface $config
+     * @param EncryptorInterface $encryptor
      */
     public function __construct(
         private readonly IdempotencyRepositoryInterface $idempotencyRepository,
         private readonly IdempotencyInterfaceFactory $idempotencyFactory,
         private readonly ConfigInterface $config,
+        private readonly EncryptorInterface $encryptor
     ) {
     }
 
@@ -61,7 +64,7 @@ class Management
         $idempotency = $this->idempotencyFactory->create();
         $idempotency->setKey((string) $idempotencyKey);
         $idempotency->setRequestHash($this->hashRequest($request));
-        $idempotency->setResponse($response);
+        $idempotency->setResponse($this->encryptor->encrypt($response));
         $idempotency->setStatus($status);
 
         $expiresAt = (int) strtotime('+' . $this->config->getIdempotencyTtl() . ' hours');

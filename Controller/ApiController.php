@@ -14,6 +14,7 @@ namespace Magebit\AgenticCommerce\Controller;
 
 use InvalidArgumentException;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
+use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
@@ -24,17 +25,53 @@ use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Service\RequestValidationService;
 
 abstract class ApiController implements ActionInterface, CsrfAwareActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
+     * @param RequestValidationService $requestValidationService
+     * @param ErrorResponseInterfaceFactory $errorResponseFactory
      */
     public function __construct(
         protected readonly JsonFactory $resultJsonFactory,
-        protected readonly RequestInterface $request
+        protected readonly RequestInterface $request,
+        protected readonly RequestValidationService $requestValidationService,
+        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory
     ) {
+    }
+
+    /**
+     * @template T of \Magebit\AgenticCommerce\Api\Data\Request\RequestInterface
+     * @param callable(array<mixed>): T $factory
+     * @return T|ErrorResponseInterface
+     */
+    protected function createRequestObjectAndValidate(callable $factory): mixed
+    {
+        /** @var Http $request */
+        $request = $this->getRequest();
+
+        /** @var string $content */
+        $content = $request->getContent();
+        $rawData = json_decode($content, true);
+
+        if (!is_array($rawData)) {
+            return $this->errorResponseFactory->create(['data' => [
+                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+                'code' => 'invalid_request',
+                'message' => 'Invalid request - array expected',
+            ]]);
+        }
+
+        $requestObject = $factory(['data' => $rawData]);
+
+        if ($validationError = $this->requestValidationService->validate($requestObject)) {
+            return $validationError;
+        }
+
+        return $requestObject;
     }
 
     /**

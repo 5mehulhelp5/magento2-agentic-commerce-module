@@ -18,6 +18,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Idempotency\Management as IdempotencyManagement;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 class ComplianceService
 {
@@ -25,11 +26,15 @@ class ComplianceService
 
     /**
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param IdempotencyManagement $idempotencyManagement
+     * @param JsonFactory $resultJsonFactory
+     * @param EncryptorInterface $encryptor
      */
     public function __construct(
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly IdempotencyManagement $idempotencyManagement,
         protected readonly JsonFactory $resultJsonFactory,
+        protected readonly EncryptorInterface $encryptor
     ) {
     }
 
@@ -106,7 +111,7 @@ class ComplianceService
 
         return $this->resultJsonFactory
             ->create()
-            ->setJsonData((string) $idempotency->getResponse())
+            ->setJsonData((string) $this->encryptor->decrypt((string) $idempotency->getResponse()))
             ->setHttpResponseCode((int) $idempotency->getStatus());
     }
 

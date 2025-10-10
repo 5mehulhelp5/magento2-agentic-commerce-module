@@ -15,6 +15,7 @@ namespace Magebit\AgenticCommerce\Api\Data\Request;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\AllowanceInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
+use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 /**
  * Delegate Payment Request interface for OpenAI Agentic Commerce
@@ -22,7 +23,7 @@ use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
  * Represents the structure of a delegated payment request where OpenAI securely shares
  * payment details with the merchant or its designated payment service provider (PSP)
  */
-interface DelegatePaymentRequestInterface
+interface DelegatePaymentRequestInterface extends RequestInterface, ValidatableDataInterface
 {
     /**
      * Get payment method

@@ -18,6 +18,8 @@ use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class CreateCheckoutSessionRequest extends DataTransferObject implements CreateCheckoutSessionRequestInterface
 {
@@ -58,5 +60,22 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements CreateC
     public function getBuyer(): ?BuyerInterface
     {
         return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function loadValidatorMetadata(ClassMetadata $metadata): void
+    {
+        // Validate raw data array directly
+        $metadata->addGetterConstraint('rawData', new Assert\Collection([
+            'fields' => [
+                'items' => new Assert\Required([
+                    new Assert\NotBlank(message: 'Items are required'),
+                ]),
+            ],
+            'allowExtraFields' => true,
+            'allowMissingFields' => false,
+        ]));
     }
 }

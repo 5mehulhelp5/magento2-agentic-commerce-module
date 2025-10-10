@@ -8,25 +8,23 @@
  */
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Controller\Checkout\Sessions;
+namespace Magebit\AgenticCommerce\Controller\Delegate\Payment;
 
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
-use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 use Magebit\AgenticCommerce\Controller\ApiController;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magebit\AgenticCommerce\Service\CheckoutSessionService;
+use Magebit\AgenticCommerce\Service\ComplianceService;
+use Magebit\AgenticCommerce\Service\RequestValidationService;
+use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterfaceFactory;
+use Magebit\AgenticCommerce\Service\DelegatePaymentService;
+use Magebit\AgenticCommerce\Model\Data\Response\DelegatePaymentResponse;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
-use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Api\ConfigInterface;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
 
 class Index extends ApiController implements HttpPostActionInterface
 {
@@ -36,10 +34,6 @@ class Index extends ApiController implements HttpPostActionInterface
      * @param RequestValidationService $requestValidationService
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
-     * @param CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
-     * @param CheckoutSessionService $checkoutSessionService
-     * @param LoggerInterface $logger
-     * @param ConfigInterface $config
      */
     public function __construct(
         JsonFactory $resultJsonFactory,
@@ -47,10 +41,9 @@ class Index extends ApiController implements HttpPostActionInterface
         RequestValidationService $requestValidationService,
         ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
-        protected readonly CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
-        protected readonly CheckoutSessionService $checkoutSessionService,
+        protected readonly DelegatePaymentRequestInterfaceFactory $delegatePaymentRequestFactory,
+        protected readonly DelegatePaymentService $delegatePaymentService,
         protected readonly LoggerInterface $logger,
-        protected readonly ConfigInterface $config
     ) {
         parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
     }
@@ -62,14 +55,6 @@ class Index extends ApiController implements HttpPostActionInterface
      */
     public function execute(): ResultInterface
     {
-        if (!$this->config->isCheckoutEnabled()) {
-            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
-                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
-                'code' => 'checkout_disabled',
-                'message' => 'Checkout is disabled',
-            ]]));
-        }
-
         /** @var Http $request */
         $request = $this->getRequest();
 
@@ -82,25 +67,24 @@ class Index extends ApiController implements HttpPostActionInterface
             return $response;
         }
 
-        /** @var CreateCheckoutSessionRequestInterface $checkoutSessionsRequest */
-        $checkoutSessionsRequest = $this->createRequestObjectAndValidate($this->checkoutSessionsRequestFactory->create(...));
+        $delegatePaymentRequest = $this->createRequestObjectAndValidate($this->delegatePaymentRequestFactory->create(...));
 
-        if ($checkoutSessionsRequest instanceof ErrorResponseInterface) {
-            return $this->makeErrorResponse($checkoutSessionsRequest);
+        if ($delegatePaymentRequest instanceof ErrorResponseInterface) {
+            return $this->makeErrorResponse($delegatePaymentRequest);
         }
 
         try {
-            $checkoutSessionResponse = $this->checkoutSessionService->create($checkoutSessionsRequest);
+            $delegatePaymentResponse = $this->delegatePaymentService->storePaymentMethod($delegatePaymentRequest);
 
-            /** @var CheckoutSessionResponse $checkoutSessionResponse */
-            $responseData = $checkoutSessionResponse->toArray();
+            /** @var DelegatePaymentResponse $delegatePaymentResponse */
+            $responseData = $delegatePaymentResponse->toArray();
             $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
 
             $response = $this->makeJsonResponse($responseData);
             $this->addHeaders($response, $request);
             return $response;
         } catch (LocalizedException $e) {
-            $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
+            $this->logger->critical('[AgenticCommerce] Error storing payment method', ['exception' => $e]);
 
             return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
@@ -108,7 +92,7 @@ class Index extends ApiController implements HttpPostActionInterface
                 'message' => $e->getLogMessage(),
             ]]));
         } catch (\Exception $e) {
-            $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
+            $this->logger->critical('[AgenticCommerce] Error storing payment method', ['exception' => $e]);
 
             return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
                 'type' => ErrorResponseInterface::TYPE_PROCESSING_ERROR,

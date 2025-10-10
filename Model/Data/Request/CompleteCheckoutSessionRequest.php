@@ -16,6 +16,8 @@ use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentDataInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class CompleteCheckoutSessionRequest extends DataTransferObject implements CompleteCheckoutSessionRequestInterface
 {
@@ -46,5 +48,22 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements Compl
     public function getPaymentData(): PaymentDataInterface
     {
         return $this->getDataInstance('payment_data', PaymentDataInterface::class, $this->paymentDataInterfaceFactory->create(...));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function loadValidatorMetadata(ClassMetadata $metadata): void
+    {
+        // Validate raw data array directly
+        $metadata->addGetterConstraint('rawData', new Assert\Collection([
+            'fields' => [
+                'payment_data' => new Assert\Required([
+                    new Assert\NotBlank(message: 'Payment data is required'),
+                ]),
+            ],
+            'allowExtraFields' => true,
+            'allowMissingFields' => false,
+        ]));
     }
 }
