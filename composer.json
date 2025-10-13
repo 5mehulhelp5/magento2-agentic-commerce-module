@@ -1,6 +1,6 @@
 {
     "name": "magebitcom/magento2-module-agentic-commerce",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "description": "Magebit Agentic Commerce extension",
     "type": "magento2-module",
     "require": {
