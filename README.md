@@ -25,7 +25,11 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 
 ### As a composer package
 
-**Will be released soon**
+```
+composer require magebitcom/magento2-module-agentic-commerce
+```
+
+Run `bin/magento setup:upgrade`
 
 ### As a module
 
