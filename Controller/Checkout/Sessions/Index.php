@@ -26,14 +26,16 @@ use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magebit\AgenticCommerce\Service\RequestValidationService;
 
 class Index extends ApiController implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param ComplianceService $complianceService
+     * @param RequestValidationService $requestValidationService
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param ComplianceService $complianceService
      * @param CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
      * @param CheckoutSessionService $checkoutSessionService
      * @param LoggerInterface $logger
@@ -42,14 +44,15 @@ class Index extends ApiController implements HttpPostActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
+        RequestValidationService $requestValidationService,
+        ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
-        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly LoggerInterface $logger,
         protected readonly ConfigInterface $config
     ) {
-        parent::__construct($resultJsonFactory, $request);
+        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
     }
 
     /**
@@ -79,20 +82,12 @@ class Index extends ApiController implements HttpPostActionInterface
             return $response;
         }
 
-        /** @var string $content */
-        $content = $request->getContent();
-        $rawData = json_decode($content, true);
-
-        if (!is_array($rawData) || !isset($rawData['items']) || !is_array($rawData['items'])) {
-            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
-                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
-                'code' => 'invalid_request',
-                'message' => 'Invalid request',
-            ]]));
-        }
-
         /** @var CreateCheckoutSessionRequestInterface $checkoutSessionsRequest */
-        $checkoutSessionsRequest = $this->checkoutSessionsRequestFactory->create(['data' => $rawData]);
+        $checkoutSessionsRequest = $this->createRequestObjectAndValidate($this->checkoutSessionsRequestFactory->create(...));
+
+        if ($checkoutSessionsRequest instanceof ErrorResponseInterface) {
+            return $this->makeErrorResponse($checkoutSessionsRequest);
+        }
 
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->create($checkoutSessionsRequest);

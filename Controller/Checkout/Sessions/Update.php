@@ -17,7 +17,7 @@ use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterfa
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Controller\ApiController;
-use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
@@ -27,14 +27,16 @@ use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magebit\AgenticCommerce\Service\RequestValidationService;
 
-class Update extends ApiController implements HttpGetActionInterface
+class Update extends ApiController implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param ComplianceService $complianceService
+     * @param RequestValidationService $requestValidationService
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
      * @param CheckoutSessionService $checkoutSessionService
      * @param UpdateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
@@ -43,14 +45,15 @@ class Update extends ApiController implements HttpGetActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
+        RequestValidationService $requestValidationService,
+        ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
-        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly UpdateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
-        protected readonly ConfigInterface $config
+        protected readonly ConfigInterface $config,
     ) {
-        parent::__construct($resultJsonFactory, $request);
+        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
     }
 
     /**
@@ -93,12 +96,11 @@ class Update extends ApiController implements HttpGetActionInterface
             ]]));
         }
 
-        /** @var string $content */
-        $content = $request->getContent();
-        $rawData = json_decode($content, true);
+        $checkoutSessionsRequest = $this->createRequestObjectAndValidate($this->checkoutSessionsRequestFactory->create(...));
 
-        /** @var UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest */
-        $checkoutSessionsRequest = $this->checkoutSessionsRequestFactory->create(['data' => $rawData]);
+        if ($checkoutSessionsRequest instanceof ErrorResponseInterface) {
+            return $this->makeErrorResponse($checkoutSessionsRequest);
+        }
 
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->update($sessionId, $checkoutSessionsRequest);

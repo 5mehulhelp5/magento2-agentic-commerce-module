@@ -19,6 +19,10 @@ interface ConfigInterface
 
     public const CONFIG_CHECKOUT_SESSION_LINKS = 'agentic_commerce/agentic_checkout/session_links';
     public const CONFIG_CHECKOUT_ROUTER_BASE_PATH = 'agentic_commerce/agentic_checkout/router_base_path';
+    public const CONFIG_WEBHOOK_URL = 'agentic_commerce/agentic_checkout/webhook_url';
+    public const CONFIG_WEBHOOK_SECRET = 'agentic_commerce/agentic_checkout/webhook_secret';
+    public const CONFIG_WEBHOOKS_ENABLED = 'agentic_commerce/agentic_checkout/enable_webhooks';
+    public const CONFIG_ORDER_STATUS_MAP = 'agentic_commerce/agentic_checkout/order_status_map';
 
     public const CONFIG_GTIN_SOURCE = 'agentic_commerce/product_feed/gtin_source';
     public const CONFIG_SELLER_NAME_SOURCE = 'agentic_commerce/product_feed/seller_name_source';
@@ -27,6 +31,8 @@ interface ConfigInterface
     public const CONFIG_SELLER_TOS_URL = 'agentic_commerce/product_feed/seller_tos_url';
     public const CONFIG_RETURN_POLICY_URL = 'agentic_commerce/product_feed/return_policy_url';
     public const CONFIG_RETURN_WINDOW = 'agentic_commerce/product_feed/return_window';
+
+    public const CONFIG_IDEMPOTENCY_TTL = 'agentic_commerce/idempotency/ttl';
 
     /**
      * @param int|null $storeId
@@ -93,4 +99,36 @@ interface ConfigInterface
      * @return string
      */
     public function getCheckoutRouterBasePath(?int $storeId = null): string;
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookUrl(?int $storeId = null): string;
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookSecret(?int $storeId = null): string;
+
+    /**
+     * @param int|null $storeId
+     * @return int
+     */
+    public function getIdempotencyTtl(?int $storeId = null): int;
+
+    /**
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function getIsWebhooksEnabled(?int $storeId = null): bool;
+
+    /**
+     * Get order status mapping configuration
+     *
+     * @param int|null $storeId
+     * @return array<array{magento_order_status: string, ac_status: string}>
+     */
+    public function getOrderStatusMap(?int $storeId = null): array;
 }

@@ -12,8 +12,9 @@ namespace Magebit\AgenticCommerce\Api\Data\Request;
 
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
+use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
-interface CompleteCheckoutSessionRequestInterface
+interface CompleteCheckoutSessionRequestInterface extends ValidatableDataInterface, RequestInterface
 {
     /**
      * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null

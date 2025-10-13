@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\OrderInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Order Data Transfer Object
  */
-class Order extends DataObject implements OrderInterface
+class Order extends DataTransferObject implements OrderInterface
 {
     /**
      * @inheritDoc
      */
     public function getId(): string
     {
-        return (string) $this->getData('id');
+        return $this->getDataString('id');
     }
 
     /**
@@ -41,7 +41,7 @@ class Order extends DataObject implements OrderInterface
      */
     public function getCheckoutSessionId(): string
     {
-        return (string) $this->getData('checkout_session_id');
+        return $this->getDataString('checkout_session_id');
     }
 
     /**
@@ -57,7 +57,7 @@ class Order extends DataObject implements OrderInterface
      */
     public function getPermalinkUrl(): string
     {
-        return (string) $this->getData('permalink_url');
+        return $this->getDataString('permalink_url');
     }
 
     /**

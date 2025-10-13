@@ -24,4 +24,11 @@
             <column name="key"/>
         </constraint>
     </table>
+
+    <table name="sales_order">
+        <column xsi:type="varchar" name="ac_order_id" nullable="true" length="255" comment="Agentic Order ID"/>
+        <index referenceId="SALES_ORDER_AC_ORDER_ID_IDX" indexType="btree">
+            <column name="ac_order_id"/>
+        </index>
+    </table>
 </schema>

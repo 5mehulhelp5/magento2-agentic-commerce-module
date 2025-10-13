@@ -22,12 +22,16 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\UpdateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CompleteCheckoutSessionRequest" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\DelegatePaymentRequest" />
 
     <!-- Supporting Data Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />
     <preference for="Magebit\AgenticCommerce\Api\Data\BuyerInterface" type="Magebit\AgenticCommerce\Model\Data\Buyer" />
     <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentProvider" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentMethod" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\AllowanceInterface" type="Magebit\AgenticCommerce\Model\Data\Allowance" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\RiskSignalInterface" type="Magebit\AgenticCommerce\Model\Data\RiskSignal" />
     <preference for="Magebit\AgenticCommerce\Api\Data\LineItemInterface" type="Magebit\AgenticCommerce\Model\Data\LineItem" />
     <preference for="Magebit\AgenticCommerce\Api\Data\TotalInterface" type="Magebit\AgenticCommerce\Model\Data\Total" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentDataInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentData" />
@@ -44,6 +48,105 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionWithOrderResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionWithOrderResponse" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Response\DelegatePaymentResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\DelegatePaymentResponse" />
+
+    <!-- Webhook Interfaces -->
+    <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\WebhookEvent" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\EventDataInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\EventData" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\RefundInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\Refund" />
+
+    <!-- Custom Loggers -->
+    <virtualType name="Magebit\AgenticCommerce\Logger\Handler\AgenticCommerceHandler" type="Magebit\AgenticCommerce\Logger\Handler\AgenticCommerce">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Magebit\AgenticCommerce\Logger\Handler\AgenticCommerceWebhooksHandler" type="Magebit\AgenticCommerce\Logger\Handler\AgenticCommerceWebhooks">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Magebit\AgenticCommerce\Logger\AgenticCommerceLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">agentic_commerce</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Magebit\AgenticCommerce\Logger\Handler\AgenticCommerceHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Magebit\AgenticCommerce\Logger\AgenticCommerceWebhooksLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">agentic_commerce_webhooks</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Magebit\AgenticCommerce\Logger\Handler\AgenticCommerceWebhooksHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Inject Custom Logger into WebhookService -->
+    <type name="Magebit\AgenticCommerce\Service\WebhookService">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceWebhooksLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject Custom Logger into Controllers -->
+    <type name="Magebit\AgenticCommerce\Controller\Checkout\Sessions\Index">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Controller\Checkout\Sessions\Update">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Controller\Checkout\Sessions\Complete">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Controller\Checkout\Sessions\Cancel">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Controller\Checkout\Sessions\Retrieve">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Controller\Delegate\Payment\Index">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Inject Custom Logger into Other Services -->
+    <type name="Magebit\AgenticCommerce\Service\CheckoutSessionService">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+    <type name="Magebit\AgenticCommerce\Cron\CleanExpiredIdempotency">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Model\Idempotency\Repository">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
 
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
         <arguments>

@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Buyer Data Transfer Object
  */
-class Buyer extends DataObject implements BuyerInterface
+class Buyer extends DataTransferObject implements BuyerInterface
 {
     /**
      * @inheritDoc
      */
     public function getFirstName(): string
     {
-        return (string) $this->getData('first_name');
+        return $this->getDataString('first_name');
     }
 
     /**
@@ -41,7 +41,7 @@ class Buyer extends DataObject implements BuyerInterface
      */
     public function getLastName(): string
     {
-        return (string) $this->getData('last_name');
+        return $this->getDataString('last_name');
     }
 
     /**
@@ -57,7 +57,7 @@ class Buyer extends DataObject implements BuyerInterface
      */
     public function getEmail(): string
     {
-        return (string) $this->getData('email');
+        return $this->getDataString('email');
     }
 
     /**
@@ -73,7 +73,7 @@ class Buyer extends DataObject implements BuyerInterface
      */
     public function getPhoneNumber(): ?string
     {
-        return $this->getData('phone_number');
+        return $this->getDataStringOrNull('phone_number');
     }
 
     /**

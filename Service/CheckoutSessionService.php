@@ -41,12 +41,15 @@ use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
 use Magebit\AgenticCommerce\Api\CartValidatorInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
+use Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magebit\AgenticCommerce\Service\WebhookService;
+use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
+use Psr\Log\LoggerInterface;
 
 /**
  * TODO: Split this service into smaller pieces
@@ -69,6 +72,11 @@ class CheckoutSessionService
      * @param CartValidatorInterface $cartValidator
      * @param MessageInterfaceFactory $messageInterfaceFactory
      * @param PaymentHandlerPool $paymentHandlerPool
+     * @param CartToBuyer $cartToBuyer
+     * @param OrderRepositoryInterface $orderRepository
+     * @param WebhookService $webhookService
+     * @param OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook
+     * @param LoggerInterface $logger
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -88,6 +96,9 @@ class CheckoutSessionService
         protected readonly PaymentHandlerPool $paymentHandlerPool,
         protected readonly CartToBuyer $cartToBuyer,
         protected readonly OrderRepositoryInterface $orderRepository,
+        protected readonly WebhookService $webhookService,
+        protected readonly OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook,
+        protected readonly LoggerInterface $logger,
     ) {
     }
 
@@ -107,6 +118,8 @@ class CheckoutSessionService
         $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $this->cartRepository->save($cart);
         $this->assignCartDataToResponse($cart, $response);
+
+        $this->logger->info('Checkout session created', ['cart_id' => $maskedCartId]);
 
         return $response;
     }
@@ -128,6 +141,9 @@ class CheckoutSessionService
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
+
+        $this->logger->info('Checkout session updated', ['cart_id' => $sessionId]);
+
         return $response;
     }
 
@@ -169,6 +185,17 @@ class CheckoutSessionService
 
         /** @var Order $order */
         $order = $this->orderRepository->get($orderId);
+        $order->setAcOrderId($sessionId);
+        $this->orderRepository->save($order);
+
+        $this->webhookService->dispatch(
+            $this->orderToOrderCreatedUpdatedWebhook->execute(
+                $order,
+                WebhookEventInterface::TYPE_ORDER_CREATED,
+                $sessionId
+            ),
+            $sessionId
+        );
 
         /** @var CheckoutSessionResponseInterface $response */
         $response = $this->checkoutSessionResponseFactory->create();
@@ -183,6 +210,8 @@ class CheckoutSessionService
         ]]);
 
         $response->setMessages([$message]);
+
+        $this->logger->info('Checkout session completed', ['cart_id' => $sessionId, 'order_id' => $order->getIncrementId()]);
 
         return $response;
     }
@@ -222,6 +251,9 @@ class CheckoutSessionService
         /** @var Quote $cart */
         $cart->setIsActive(false);
         $this->cartRepository->save($cart);
+
+        $this->logger->info('Checkout session canceled', ['cart_id' => $sessionId]);
+
         return $this->retrieve($sessionId);
     }
 
@@ -420,7 +452,7 @@ class CheckoutSessionService
         }
 
         if ($phoneNumber = $buyer->getPhoneNumber()) {
-            $cart->getShippingAddress()->setTelephone((string) $buyer->getPhoneNumber());
+            $cart->getShippingAddress()->setTelephone($phoneNumber);
         }
     }
 

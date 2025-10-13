@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\TotalInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Total Data Transfer Object
  */
-class Total extends DataObject implements TotalInterface
+class Total extends DataTransferObject implements TotalInterface
 {
     /**
      * @inheritDoc
      */
     public function getType(): string
     {
-        return (string) $this->getData('type');
+        return $this->getDataString('type');
     }
 
     /**
@@ -41,7 +41,7 @@ class Total extends DataObject implements TotalInterface
      */
     public function getDisplayText(): string
     {
-        return (string) $this->getData('display_text');
+        return $this->getDataString('display_text');
     }
 
     /**
@@ -57,7 +57,7 @@ class Total extends DataObject implements TotalInterface
      */
     public function getAmount(): int
     {
-        return (int) $this->getData('amount');
+        return $this->getDataInt('amount');
     }
 
     /**

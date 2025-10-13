@@ -16,8 +16,13 @@ interface ErrorResponseInterface
 {
     public const TYPE_INVALID_REQUEST = 'invalid_request';
     public const TYPE_REQUEST_NOT_IDEMPOTENT = 'request_not_idempotent';
+    public const TYPE_RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded';
     public const TYPE_PROCESSING_ERROR = 'processing_error';
     public const TYPE_SERVICE_UNAVAILABLE = 'service_unavailable';
+
+    public const CODE_INVALID_CARD = 'invalid_card';
+    public const CODE_DUPLICATE_REQUEST = 'duplicate_request';
+    public const CODE_IDEMPOTENCY_CONFLICT = 'idempotency_conflict';
 
     /**
      * Get type

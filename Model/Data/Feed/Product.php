@@ -13,9 +13,9 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data\Feed;
 
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
-class Product extends DataObject implements FeedProductInterface
+class Product extends DataTransferObject implements FeedProductInterface
 {
     use Trait\WithOpenAIFlagsData;
     use Trait\WithProductData;

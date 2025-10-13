@@ -37,10 +37,39 @@
                     <comment>Base path to use for the router. Default is `checkout_sessions`</comment>
                     <validate>required-entry</validate>
                 </field>
-                <field id="session_links" type="text" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                <field id="order_success_page" type="text" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Order Success Page</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="session_links" type="text" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
                     <label>Checkout Session Links</label>
                     <comment>List of links (e.g. ToS/privacy policy/etc.) to be displayed to the customer. List of links (e.g. ToS/privacy policy/etc.) to be displayed to the customer</comment>
                     <frontend_model>Magebit\AgenticCommerce\Block\Adminhtml\Form\Field\SessionLinks</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+                <field id="enable_webhooks" type="select" sortOrder="40" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable Webhooks</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="webhook_url" type="text" sortOrder="50" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Webhook URL</label>
+                    <comment>URL to send webhooks to</comment>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enable_webhooks">1</field>
+                    </depends>
+                </field>
+                <field id="webhook_secret" type="text" sortOrder="60" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Webhook Secret</label>
+                    <comment>Secret to use for the webhook</comment>
+                    <depends>
+                        <field id="enable_webhooks">1</field>
+                    </depends>
+                </field>
+                <field id="order_status_map" translate="label" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order Status Mapping</label>
+                    <comment>Map Magento order statuses to Agentic Commerce order statuses for webhooks</comment>
+                    <frontend_model>Magebit\AgenticCommerce\Block\Adminhtml\Form\Field\OrderStatusMap</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                 </field>
 			</group>
@@ -79,6 +108,15 @@
                 <field id="return_window" type="text" sortOrder="70" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
                     <label>Return Window</label>
                     <comment>Days allowed for return</comment>
+                    <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                </field>
+			</group>
+
+            <group id="idempotency" sortOrder="40" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Idempotency</label>
+                <field id="ttl" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>TTL</label>
+                    <comment>Time to live for idempotency. Default is `24 hours`</comment>
                     <validate>required-entry validate-digits validate-zero-or-greater</validate>
                 </field>
 			</group>

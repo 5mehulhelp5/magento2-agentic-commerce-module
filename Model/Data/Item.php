@@ -13,19 +13,19 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
  * Item Data Transfer Object
  */
-class Item extends DataObject implements ItemInterface
+class Item extends DataTransferObject implements ItemInterface
 {
     /**
      * @inheritDoc
      */
     public function getId(): string
     {
-        return (string) $this->getData('id');
+        return $this->getDataString('id');
     }
 
     /**
@@ -41,7 +41,7 @@ class Item extends DataObject implements ItemInterface
      */
     public function getQuantity(): int
     {
-        return (int) $this->getData('quantity');
+        return $this->getDataInt('quantity');
     }
 
     /**

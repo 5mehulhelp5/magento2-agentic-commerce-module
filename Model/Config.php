@@ -213,6 +213,106 @@ class Config implements ConfigInterface
     }
 
     /**
+     * @param int|null $storeId
+     * @return int
+     */
+    public function getIdempotencyTtl(?int $storeId = null): int
+    {
+        $value = $this->scopeConfig->getValue(ConfigInterface::CONFIG_IDEMPOTENCY_TTL, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$value) {
+            return 24;
+        }
+
+        // @phpstan-ignore cast.int
+        return (int) $value;
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookUrl(?int $storeId = null): string
+    {
+        /** @var string|null $url */
+        $url = $this->scopeConfig->getValue(ConfigInterface::CONFIG_WEBHOOK_URL, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$url) {
+            throw new LocalizedException(__('Webhook URL is not configured.'));
+        }
+
+        return $url;
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookSecret(?int $storeId = null): string
+    {
+        /** @var string|null $secret */
+        $secret = $this->scopeConfig->getValue(ConfigInterface::CONFIG_WEBHOOK_SECRET, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$secret) {
+            throw new LocalizedException(__('Webhook secret is not configured.'));
+        }
+
+        return $secret;
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function getIsWebhooksEnabled(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(ConfigInterface::CONFIG_WEBHOOKS_ENABLED, ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    /**
+     * Get order status mapping configuration
+     *
+     * @param int|null $storeId
+     * @return array<array{magento_order_status: string, ac_status: string}>
+     */
+    public function getOrderStatusMap(?int $storeId = null): array
+    {
+        $value = $this->scopeConfig->getValue(
+            ConfigInterface::CONFIG_ORDER_STATUS_MAP,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $value = $this->serializer->unserialize($value);
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        // Filter out invalid entries and ensure proper structure
+        $mappings = [];
+        foreach ($value as $mapping) {
+            if (is_array($mapping)
+                && isset($mapping['magento_order_status'])
+                && isset($mapping['ac_status'])
+            ) {
+                $mappings[] = [
+                    'magento_order_status' => (string) $mapping['magento_order_status'],
+                    'ac_status' => (string) $mapping['ac_status']
+                ];
+            }
+        }
+
+        return $mappings;
+    }
+
+    /**
      * @param string $url
      * @return string
      */

@@ -17,12 +17,39 @@
 			</general_settings>
             <agentic_checkout>
                 <router_base_path>checkout_sessions</router_base_path>
+                <order_success_page>checkout/onepage/success</order_success_page>
+                <enable_webhooks>0</enable_webhooks>
+                <order_status_map>
+                    <item1>
+                        <magento_order_status>pending</magento_order_status>
+                        <ac_status>created</ac_status>
+                    </item1>
+                    <item2>
+                        <magento_order_status>processing</magento_order_status>
+                        <ac_status>confirmed</ac_status>
+                    </item2>
+                    <item3>
+                        <magento_order_status>complete</magento_order_status>
+                        <ac_status>fulfilled</ac_status>
+                    </item3>
+                    <item4>
+                        <magento_order_status>canceled</magento_order_status>
+                        <ac_status>canceled</ac_status>
+                    </item4>
+                    <item5>
+                        <magento_order_status>closed</magento_order_status>
+                        <ac_status>canceled</ac_status>
+                    </item5>
+                </order_status_map>
             </agentic_checkout>
 			<product_feed>
 				<gtin_source>ean</gtin_source>
 				<seller_name_source>general</seller_name_source>
 				<return_window>14</return_window>
 			</product_feed>
+            <idempotency>
+                <ttl>24</ttl>
+            </idempotency>
 		</agentic_commerce>
 	</default>
 </config>

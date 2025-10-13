@@ -17,9 +17,14 @@ use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Constraints as Assert;
 
-class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutSessionRequestInterface
+class UpdateCheckoutSessionRequest extends DataTransferObject implements
+    UpdateCheckoutSessionRequestInterface,
+    ValidatableDataInterface
 {
     /**
      * @param ItemInterfaceFactory $itemInterfaceFactory
@@ -41,17 +46,7 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getItems(): array
     {
-        /** @var array<mixed> $items */
-        $items = $this->getData('items') ?? [];
-
-        return array_map(function ($item) {
-            if ($item instanceof ItemInterface) {
-                return $item;
-            }
-
-            /** @var array<mixed> $item */
-            return $this->itemInterfaceFactory->create(['data' => $item]);
-        }, $items);
+        return $this->getDataInstanceArray('items', ItemInterface::class, $this->itemInterfaceFactory->create(...));
     }
 
     /**
@@ -59,15 +54,11 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getFulfillmentAddress(): ?AddressInterface
     {
-        $address = $this->getData('fulfillment_address');
-
-        if ($address instanceof AddressInterface) {
-            return $address;
-        }
-        if (is_array($address)) {
-            return $this->addressInterfaceFactory->create(['data' => $address]);
-        }
-        return null;
+        return $this->getDataInstance(
+            'fulfillment_address',
+            AddressInterface::class,
+            $this->addressInterfaceFactory->create(...)
+        );
     }
 
     /**
@@ -75,15 +66,7 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getBuyer(): ?BuyerInterface
     {
-        $buyer = $this->getData('buyer');
-
-        if ($buyer instanceof BuyerInterface) {
-            return $buyer;
-        }
-        if (is_array($buyer)) {
-            return $this->buyerInterfaceFactory->create(['data' => $buyer]);
-        }
-        return null;
+        return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
     }
 
     /**
@@ -91,7 +74,97 @@ class UpdateCheckoutSessionRequest extends DataObject implements UpdateCheckoutS
      */
     public function getFulfillmentOptionId(): ?string
     {
-        // @phpstan-ignore return.type
-        return $this->getData('fulfillment_option_id');
+        return $this->getDataStringOrNull('fulfillment_option_id');
+    }
+
+    /**
+     * Validation based on spec:
+     * https://developers.openai.com/commerce/specs/checkout
+     *
+     * @inheritDoc
+     */
+    public static function loadValidatorMetadata(ClassMetadata $metadata): void
+    {
+        // Validate raw data array directly per OpenAI Agentic Checkout Spec
+        $metadata->addGetterConstraint('rawData', new Assert\Collection([
+            'fields' => [
+                'buyer' => new Assert\Optional([
+                    new Assert\Type('array'),
+                    new Assert\Collection([
+                        'fields' => [
+                            'first_name' => new Assert\Required([
+                                new Assert\NotBlank(),
+                            ]),
+                            'last_name' => new Assert\Required([
+                                new Assert\NotBlank(),
+                            ]),
+                            'email' => new Assert\Required([
+                                new Assert\NotBlank(),
+                                new Assert\Email(message: 'Email must be a valid email address'),
+                            ]),
+                            'phone_number' => new Assert\Optional(),
+                        ],
+                        'allowExtraFields' => false,
+                    ]),
+                ]),
+                'items' => new Assert\Optional([
+                    new Assert\Type('array'),
+                    new Assert\All([
+                        new Assert\Collection([
+                            'fields' => [
+                                'id' => new Assert\Required([
+                                    new Assert\NotBlank(message: 'Item id is required'),
+                                ]),
+                                'quantity' => new Assert\Required([
+                                    new Assert\NotBlank(message: 'Item quantity is required'),
+                                    new Assert\Type('int'),
+                                    new Assert\GreaterThan(0, message: 'Quantity must be greater than 0'),
+                                ]),
+                            ],
+                            'allowExtraFields' => false,
+                        ]),
+                    ]),
+                ]),
+                'fulfillment_address' => new Assert\Optional([
+                    new Assert\Type('array'),
+                    new Assert\Collection([
+                        'fields' => [
+                            'name' => new Assert\Required([
+                                new Assert\NotBlank(),
+                                new Assert\Length(max: 256),
+                            ]),
+                            'line_one' => new Assert\Required([
+                                new Assert\NotBlank(),
+                                new Assert\Length(max: 60),
+                            ]),
+                            'line_two' => new Assert\Optional([
+                                new Assert\Length(max: 60),
+                            ]),
+                            'city' => new Assert\Required([
+                                new Assert\NotBlank(),
+                                new Assert\Length(max: 60),
+                            ]),
+                            'state' => new Assert\Optional(),
+                            'country' => new Assert\Required([
+                                new Assert\NotBlank(),
+                                new Assert\Length(min: 2, max: 2),
+                                new Assert\Regex(
+                                    '/^[A-Z]{2}$/',
+                                    message: 'Country must be ISO-3166-1 alpha-2 (e.g., "US")'
+                                ),
+                            ]),
+                            'postal_code' => new Assert\Required([
+                                new Assert\NotBlank(),
+                                new Assert\Length(max: 20),
+                            ]),
+                        ],
+                        'allowExtraFields' => false,
+                    ]),
+                ]),
+                'fulfillment_option_id' => new Assert\Optional(),
+            ],
+            'allowExtraFields' => false,
+            'allowMissingFields' => true,
+        ]));
     }
 }

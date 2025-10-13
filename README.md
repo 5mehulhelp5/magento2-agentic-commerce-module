@@ -13,7 +13,8 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 - [x] ChatGPT Compatible Product Feed Export
 - [x] Instant Checkout Ready
 - [x] Agentic Checkout Configuration (according to ACP)
-- [ ] Delegated Payment Support
+- [x] Agentic Checkout webhooks
+- [x] Delegated Payment Support
 
 ## Requirements
 
@@ -87,6 +88,67 @@ Source Attribute value can be a `string` or an `object`:
 Source classes must implement the `Magebit\AgenticCommerce\Api\Mapping\SourceInterface` interface.
 
 Check out the default `ac_product_feed_mapping.xml` config for a full reference.
+
+## Delegated Payments
+
+By default, this module does not store any payment data as the implementation logic will be different depending on what PSP is used by the merchant. To enable delegated payments, it's required to implement a
+class that implements `Magebit\AgenticCommerce\Api\PaymentMethodVaultHandlerInterface` and handles the storage of the
+payment method data. Payment Method Vault handler will receive `DelegatePaymentRequestInterface` object and must return a vault token.
+
+An example for an imaginary FooBar payment service provider:
+```php
+<?php
+
+namespace My\Module\AgenticCommerce\Model;
+
+use Magebit\AgenticCommerce\Api\PaymentMethodVaultHandlerInterface;
+use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface;
+
+class FooBarPaymentVaultHandler implements DelegatePaymentRequestInterface
+{
+    /**
+     * @param DelegatePaymentRequestInterface $request 
+     * @return bool 
+     */
+    public function canStore(DelegatePaymentRequestInterface $request): bool
+    {
+        return $request->getPaymentMethod()->getType() === 'card';
+    }
+
+    /**
+     * @param DelegatePaymentRequestInterface $request 
+     * @return string 
+     */
+    public function handle(DelegatePaymentRequestInterface $request): string
+    {
+        $fooBarVaultToken = $this->fooBarPaymentsApi->createPaymentMethod([
+            'type' => 'card',
+            'number' => $request->getPaymentMethod()->getNumber(),
+            'expMonth' => $request->getPaymentMethod()->getExpMonth(),
+            'expYear' => $request->getPaymentMethod()->getExpYear(),
+            'cvc' => $request->getPaymentMethod()->getCvc(),
+        ]);
+
+        return $fooBarVaultToken->id;
+    }
+}
+```
+
+Vault handler class must be registered in di.xml:
+
+```xml
+<type name="Magebit\AgenticCommerce\Service\DelegatePaymentService">
+    <arguments>
+        <argument name="paymentMethodVaultHandlers" xsi:type="array">
+            <item name="foo_bar" xsi:type="object">My\Module\AgenticCommerce\Model\FooBarPaymentVaultHandler</item>
+        </argument>
+    </arguments>
+</type>
+```
+
+### Handling place order requests
+
+See: `Magebit\AgenticCommerce\Model\Payment\StripePaymentsHandler`
 
 ## Contributing
 

@@ -14,19 +14,18 @@ namespace Magebit\AgenticCommerce\Model\Data\Response;
 
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
-use Magento\Framework\DataObject;
 
 /**
  * Error Response Data Transfer Object
  */
-class ErrorResponse extends DataObject implements ErrorResponseInterface
+class ErrorResponse extends DataTransferObject implements ErrorResponseInterface
 {
     /**
      * @inheritDoc
      */
     public function getType(): string
     {
-        return (string) $this->getData('type');
+        return $this->getDataString('type');
     }
 
     /**
@@ -42,7 +41,7 @@ class ErrorResponse extends DataObject implements ErrorResponseInterface
      */
     public function getCode(): string
     {
-        return (string) $this->getData('code');
+        return $this->getDataString('code');
     }
 
     /**
@@ -58,7 +57,7 @@ class ErrorResponse extends DataObject implements ErrorResponseInterface
      */
     public function getMessage(): string
     {
-        return (string) $this->getData('message');
+        return $this->getDataString('message');
     }
 
     /**
@@ -74,7 +73,7 @@ class ErrorResponse extends DataObject implements ErrorResponseInterface
      */
     public function getParam(): ?string
     {
-        return $this->getData('param');
+        return $this->getDataStringOrNull('param');
     }
 
     /**
