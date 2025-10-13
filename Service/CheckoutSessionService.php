@@ -48,6 +48,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedWebhook;
+use Psr\Log\LoggerInterface;
 
 /**
  * TODO: Split this service into smaller pieces
@@ -73,6 +74,7 @@ class CheckoutSessionService
      * @param CartToBuyer $cartToBuyer
      * @param OrderRepositoryInterface $orderRepository
      * @param WebhookService $webhookService
+     * @param LoggerInterface $logger
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -94,6 +96,7 @@ class CheckoutSessionService
         protected readonly OrderRepositoryInterface $orderRepository,
         protected readonly WebhookService $webhookService,
         protected readonly OrderToOrderCreatedWebhook $orderToOrderCreatedWebhook,
+        protected readonly LoggerInterface $logger,
     ) {
     }
 
@@ -113,6 +116,8 @@ class CheckoutSessionService
         $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $this->cartRepository->save($cart);
         $this->assignCartDataToResponse($cart, $response);
+
+        $this->logger->info('Checkout session created', ['cart_id' => $maskedCartId]);
 
         return $response;
     }
@@ -134,6 +139,9 @@ class CheckoutSessionService
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
+
+        $this->logger->info('Checkout session updated', ['cart_id' => $sessionId]);
+
         return $response;
     }
 
@@ -197,6 +205,8 @@ class CheckoutSessionService
 
         $response->setMessages([$message]);
 
+        $this->logger->info('Checkout session completed', ['cart_id' => $sessionId, 'order_id' => $order->getIncrementId()]);
+
         return $response;
     }
 
@@ -235,6 +245,9 @@ class CheckoutSessionService
         /** @var Quote $cart */
         $cart->setIsActive(false);
         $this->cartRepository->save($cart);
+
+        $this->logger->info('Checkout session canceled', ['cart_id' => $sessionId]);
+
         return $this->retrieve($sessionId);
     }
 

@@ -64,11 +64,13 @@ class WebhookService
 
             if ($curl->getStatus() >= 200 && $curl->getStatus() < 300) {
                 $this->logger->info('Webhook dispatched', [
+                    'type' => $webhookEvent->getType(),
                     'signature' => $signature,
                     'session_id' => $sessionId,
                 ]);
             } else {
                 $this->logger->error('Webhook failed', [
+                    'type' => $webhookEvent->getType(),
                     'signature' => $signature,
                     'session_id' => $sessionId,
                     'response' => $response,
