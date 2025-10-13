@@ -229,6 +229,47 @@ class Config implements ConfigInterface
     }
 
     /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookUrl(?int $storeId = null): string
+    {
+        /** @var string|null $url */
+        $url = $this->scopeConfig->getValue(ConfigInterface::CONFIG_WEBHOOK_URL, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$url) {
+            throw new LocalizedException(__('Webhook URL is not configured.'));
+        }
+
+        return $url;
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookSecret(?int $storeId = null): string
+    {
+        /** @var string|null $secret */
+        $secret = $this->scopeConfig->getValue(ConfigInterface::CONFIG_WEBHOOK_SECRET, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$secret) {
+            throw new LocalizedException(__('Webhook secret is not configured.'));
+        }
+
+        return $secret;
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function getIsWebhooksEnabled(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(ConfigInterface::CONFIG_WEBHOOKS_ENABLED, ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    /**
      * @param string $url
      * @return string
      */

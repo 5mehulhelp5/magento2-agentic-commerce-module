@@ -17,7 +17,7 @@ use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterfa
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Controller\ApiController;
-use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
@@ -29,7 +29,7 @@ use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AgenticCommerce\Service\RequestValidationService;
 
-class Update extends ApiController implements HttpGetActionInterface
+class Update extends ApiController implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory

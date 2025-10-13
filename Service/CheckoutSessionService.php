@@ -44,9 +44,10 @@ use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magebit\AgenticCommerce\Service\WebhookService;
+use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedWebhook;
 
 /**
  * TODO: Split this service into smaller pieces
@@ -69,6 +70,9 @@ class CheckoutSessionService
      * @param CartValidatorInterface $cartValidator
      * @param MessageInterfaceFactory $messageInterfaceFactory
      * @param PaymentHandlerPool $paymentHandlerPool
+     * @param CartToBuyer $cartToBuyer
+     * @param OrderRepositoryInterface $orderRepository
+     * @param WebhookService $webhookService
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -88,6 +92,8 @@ class CheckoutSessionService
         protected readonly PaymentHandlerPool $paymentHandlerPool,
         protected readonly CartToBuyer $cartToBuyer,
         protected readonly OrderRepositoryInterface $orderRepository,
+        protected readonly WebhookService $webhookService,
+        protected readonly OrderToOrderCreatedWebhook $orderToOrderCreatedWebhook,
     ) {
     }
 
@@ -169,6 +175,13 @@ class CheckoutSessionService
 
         /** @var Order $order */
         $order = $this->orderRepository->get($orderId);
+        $order->setAcOrderId($sessionId);
+        $this->orderRepository->save($order);
+
+        $this->webhookService->dispatch(
+            $this->orderToOrderCreatedWebhook->execute($order, $sessionId),
+            $sessionId
+        );
 
         /** @var CheckoutSessionResponseInterface $response */
         $response = $this->checkoutSessionResponseFactory->create();
@@ -420,7 +433,7 @@ class CheckoutSessionService
         }
 
         if ($phoneNumber = $buyer->getPhoneNumber()) {
-            $cart->getShippingAddress()->setTelephone((string) $buyer->getPhoneNumber());
+            $cart->getShippingAddress()->setTelephone($phoneNumber);
         }
     }
 

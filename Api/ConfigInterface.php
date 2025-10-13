@@ -19,6 +19,9 @@ interface ConfigInterface
 
     public const CONFIG_CHECKOUT_SESSION_LINKS = 'agentic_commerce/agentic_checkout/session_links';
     public const CONFIG_CHECKOUT_ROUTER_BASE_PATH = 'agentic_commerce/agentic_checkout/router_base_path';
+    public const CONFIG_WEBHOOK_URL = 'agentic_commerce/agentic_checkout/webhook_url';
+    public const CONFIG_WEBHOOK_SECRET = 'agentic_commerce/agentic_checkout/webhook_secret';
+    public const CONFIG_WEBHOOKS_ENABLED = 'agentic_commerce/agentic_checkout/enable_webhooks';
 
     public const CONFIG_GTIN_SOURCE = 'agentic_commerce/product_feed/gtin_source';
     public const CONFIG_SELLER_NAME_SOURCE = 'agentic_commerce/product_feed/seller_name_source';
@@ -98,7 +101,25 @@ interface ConfigInterface
 
     /**
      * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookUrl(?int $storeId = null): string;
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getWebhookSecret(?int $storeId = null): string;
+
+    /**
+     * @param int|null $storeId
      * @return int
      */
     public function getIdempotencyTtl(?int $storeId = null): int;
+
+    /**
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function getIsWebhooksEnabled(?int $storeId = null): bool;
 }

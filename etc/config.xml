@@ -17,6 +17,8 @@
 			</general_settings>
             <agentic_checkout>
                 <router_base_path>checkout_sessions</router_base_path>
+                <order_success_page>checkout/onepage/success</order_success_page>
+                <enable_webhooks>0</enable_webhooks>
             </agentic_checkout>
 			<product_feed>
 				<gtin_source>ean</gtin_source>

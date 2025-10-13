@@ -50,6 +50,11 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\DelegatePaymentResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\DelegatePaymentResponse" />
 
+    <!-- Webhook Interfaces -->
+    <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\WebhookEvent" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\EventDataInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\EventData" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\RefundInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\Refund" />
+
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
         <arguments>
             <argument name="moduleName" xsi:type="string">Magebit_AgenticCommerce</argument>
