@@ -66,6 +66,12 @@
                         <field id="enable_webhooks">1</field>
                     </depends>
                 </field>
+                <field id="order_status_map" translate="label" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order Status Mapping</label>
+                    <comment>Map Magento order statuses to Agentic Commerce order statuses for webhooks</comment>
+                    <frontend_model>Magebit\AgenticCommerce\Block\Adminhtml\Form\Field\OrderStatusMap</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
 			</group>
 
             <group id="product_feed" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">

@@ -270,6 +270,49 @@ class Config implements ConfigInterface
     }
 
     /**
+     * Get order status mapping configuration
+     *
+     * @param int|null $storeId
+     * @return array<array{magento_order_status: string, ac_status: string}>
+     */
+    public function getOrderStatusMap(?int $storeId = null): array
+    {
+        $value = $this->scopeConfig->getValue(
+            ConfigInterface::CONFIG_ORDER_STATUS_MAP,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $value = $this->serializer->unserialize($value);
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        // Filter out invalid entries and ensure proper structure
+        $mappings = [];
+        foreach ($value as $mapping) {
+            if (is_array($mapping)
+                && isset($mapping['magento_order_status'])
+                && isset($mapping['ac_status'])
+            ) {
+                $mappings[] = [
+                    'magento_order_status' => (string) $mapping['magento_order_status'],
+                    'ac_status' => (string) $mapping['ac_status']
+                ];
+            }
+        }
+
+        return $mappings;
+    }
+
+    /**
      * @param string $url
      * @return string
      */

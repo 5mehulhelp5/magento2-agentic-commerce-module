@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   MIT
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_creditmemo_refund">
+        <observer name="agentic_commerce_creditmemo_refund" instance="Magebit\AgenticCommerce\Observer\SalesOrderCreditmemoRefundObserver"/>
+    </event>
+</config>

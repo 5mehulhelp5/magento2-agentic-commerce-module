@@ -41,13 +41,14 @@ use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
 use Magebit\AgenticCommerce\Api\CartValidatorInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
+use Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
-use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedWebhook;
+use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -74,6 +75,7 @@ class CheckoutSessionService
      * @param CartToBuyer $cartToBuyer
      * @param OrderRepositoryInterface $orderRepository
      * @param WebhookService $webhookService
+     * @param OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook
      * @param LoggerInterface $logger
      */
     public function __construct(
@@ -95,7 +97,7 @@ class CheckoutSessionService
         protected readonly CartToBuyer $cartToBuyer,
         protected readonly OrderRepositoryInterface $orderRepository,
         protected readonly WebhookService $webhookService,
-        protected readonly OrderToOrderCreatedWebhook $orderToOrderCreatedWebhook,
+        protected readonly OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook,
         protected readonly LoggerInterface $logger,
     ) {
     }
@@ -187,7 +189,11 @@ class CheckoutSessionService
         $this->orderRepository->save($order);
 
         $this->webhookService->dispatch(
-            $this->orderToOrderCreatedWebhook->execute($order, $sessionId),
+            $this->orderToOrderCreatedUpdatedWebhook->execute(
+                $order,
+                WebhookEventInterface::TYPE_ORDER_CREATED,
+                $sessionId
+            ),
             $sessionId
         );
 

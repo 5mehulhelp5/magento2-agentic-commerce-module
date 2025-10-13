@@ -22,6 +22,7 @@ interface ConfigInterface
     public const CONFIG_WEBHOOK_URL = 'agentic_commerce/agentic_checkout/webhook_url';
     public const CONFIG_WEBHOOK_SECRET = 'agentic_commerce/agentic_checkout/webhook_secret';
     public const CONFIG_WEBHOOKS_ENABLED = 'agentic_commerce/agentic_checkout/enable_webhooks';
+    public const CONFIG_ORDER_STATUS_MAP = 'agentic_commerce/agentic_checkout/order_status_map';
 
     public const CONFIG_GTIN_SOURCE = 'agentic_commerce/product_feed/gtin_source';
     public const CONFIG_SELLER_NAME_SOURCE = 'agentic_commerce/product_feed/seller_name_source';
@@ -122,4 +123,12 @@ interface ConfigInterface
      * @return bool
      */
     public function getIsWebhooksEnabled(?int $storeId = null): bool;
+
+    /**
+     * Get order status mapping configuration
+     *
+     * @param int|null $storeId
+     * @return array<array{magento_order_status: string, ac_status: string}>
+     */
+    public function getOrderStatusMap(?int $storeId = null): array;
 }
