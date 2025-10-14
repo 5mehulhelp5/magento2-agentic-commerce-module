@@ -19,6 +19,7 @@ use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Idempotency\Management as IdempotencyManagement;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
 
 class ComplianceService
 {
@@ -29,12 +30,14 @@ class ComplianceService
      * @param IdempotencyManagement $idempotencyManagement
      * @param JsonFactory $resultJsonFactory
      * @param EncryptorInterface $encryptor
+     * @param ConfigInterface $config
      */
     public function __construct(
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly IdempotencyManagement $idempotencyManagement,
         protected readonly JsonFactory $resultJsonFactory,
-        protected readonly EncryptorInterface $encryptor
+        protected readonly EncryptorInterface $encryptor,
+        protected readonly ConfigInterface $config
     ) {
     }
 
@@ -49,6 +52,21 @@ class ComplianceService
 
     /**
      * @param Http $request
+     * @return bool
+     */
+    public function validateApiToken(Http $request): bool
+    {
+        $apiToken = $this->config->getApiToken();
+
+        if (!$apiToken) {
+            return true;
+        }
+
+        return $request->getHeader('Authorization') === 'Bearer ' . $apiToken;
+    }
+
+    /**
+     * @param Http $request
      * @return null|ErrorResponseInterface
      */
     public function validateRequest(Http $request): ?ErrorResponseInterface
@@ -58,6 +76,15 @@ class ComplianceService
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
                 'code' => 'invalid_api_version',
                 'message' => 'Invalid API version',
+            ]]);
+        }
+
+        if (!$this->validateApiToken($request)) {
+            return $this->errorResponseFactory->create(['data' => [
+                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+                'code' => 'invalid_api_token',
+                'message' => 'Invalid API token',
+                '_statusCode' => 401,
             ]]);
         }
 

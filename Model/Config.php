@@ -270,6 +270,22 @@ class Config implements ConfigInterface
     }
 
     /**
+     * @param int|null $storeId
+     * @return string|null
+     */
+    public function getApiToken(?int $storeId = null): ?string
+    {
+        /** @var string|null $token */
+        $token = $this->scopeConfig->getValue(
+            ConfigInterface::CONFIG_API_TOKEN,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        return $token ?: null;
+    }
+
+    /**
      * Get order status mapping configuration
      *
      * @param int|null $storeId
