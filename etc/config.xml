@@ -19,6 +19,8 @@
                 <router_base_path>checkout_sessions</router_base_path>
                 <order_success_page>checkout/onepage/success</order_success_page>
                 <enable_webhooks>0</enable_webhooks>
+                <api_token backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <webhook_secret backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
                 <order_status_map>
                     <item1>
                         <magento_order_status>pending</magento_order_status>
