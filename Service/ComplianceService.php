@@ -57,6 +57,11 @@ class ComplianceService
     public function validateApiToken(Http $request): bool
     {
         $apiToken = $this->config->getApiToken();
+
+        if (!$apiToken) {
+            return true;
+        }
+
         return $request->getHeader('Authorization') === 'Bearer ' . $apiToken;
     }
 
@@ -79,6 +84,7 @@ class ComplianceService
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
                 'code' => 'invalid_api_token',
                 'message' => 'Invalid API token',
+                '_statusCode' => 401,
             ]]);
         }
 

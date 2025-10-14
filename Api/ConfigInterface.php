@@ -127,9 +127,9 @@ interface ConfigInterface
 
     /**
      * @param int|null $storeId
-     * @return string
+     * @return string|null
      */
-    public function getApiToken(?int $storeId = null): string;
+    public function getApiToken(?int $storeId = null): ?string;
 
     /**
      * Get order status mapping configuration

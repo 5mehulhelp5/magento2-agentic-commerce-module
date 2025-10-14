@@ -271,9 +271,9 @@ class Config implements ConfigInterface
 
     /**
      * @param int|null $storeId
-     * @return string
+     * @return string|null
      */
-    public function getApiToken(?int $storeId = null): string
+    public function getApiToken(?int $storeId = null): ?string
     {
         /** @var string|null $token */
         $token = $this->scopeConfig->getValue(
@@ -282,7 +282,7 @@ class Config implements ConfigInterface
             $storeId
         );
 
-        return $token ?? '';
+        return $token ?: null;
     }
 
     /**

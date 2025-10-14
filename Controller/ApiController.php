@@ -83,8 +83,14 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
     public function makeErrorResponse(ErrorResponseInterface $errorResponse, int $statusCode = 400): ResultJson
     {
         /** @var ErrorResponse $errorResponse */
+        if ($errorResponse->getData('_statusCode')) {
+            // @phpstan-ignore cast.int
+            $statusCode = (int) $errorResponse->getData('_statusCode');
+            $errorResponse->unsetData('_statusCode');
+        }
+
         /** @var array<mixed> $data */
-        $data = $errorResponse->getData();
+        $data = $errorResponse->toArray();
 
         return $this->makeJsonResponse($data, $statusCode);
     }
