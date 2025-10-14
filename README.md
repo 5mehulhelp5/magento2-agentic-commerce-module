@@ -15,6 +15,7 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 - [x] Agentic Checkout Configuration (according to ACP)
 - [x] Agentic Checkout webhooks
 - [x] Delegated Payment Support
+- [ ] Unit and integration tests
 
 ## Requirements
 
